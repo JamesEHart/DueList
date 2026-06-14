@@ -1,0 +1,9 @@
+credentials.json
+config.json
+assignments.json
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
