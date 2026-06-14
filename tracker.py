@@ -52,9 +52,9 @@ def _print_table(assignments):
 def cmd_add(args):
     data = storage.load()
     try:
-        due_dt = dateparser.parse(args.due, default=date.today().replace(day=1).__class__(date.today().year, date.today().month, 1))
+        due_dt = dateparser.parse(args.due)
         due_str = due_dt.date().isoformat()
-    except (ValueError, OverflowError):
+    except (ValueError, OverflowError, TypeError):
         print(f"Could not parse due date: '{args.due}'")
         sys.exit(1)
 
