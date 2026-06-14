@@ -11,6 +11,7 @@ A command-line assignment and deadline tracker built for students. Add your assi
 - View only what's due in the next 7 days
 - Mark assignments done or remove them
 - Sync everything to a Google Sheet with automatic color coding
+- Export a weekly summary as a formatted Word document
 - Interactive REPL mode — run once and type commands without re-invoking Python
 
 ---
@@ -58,6 +59,7 @@ python tracker.py upcoming
 python tracker.py done 2
 python tracker.py remove 3
 python tracker.py sync
+python tracker.py export
 ```
 
 ---
@@ -71,6 +73,7 @@ python tracker.py sync
 | `upcoming` | Show assignments due within the next 7 days |
 | `done <id>` | Mark an assignment as done |
 | `remove <id>` | Delete an assignment |
+| `export` | Export a weekly summary as a Word doc |
 | `sync` | Push current state to Google Sheets |
 
 **Due dates** accept natural language: `"June 20"`, `"next Friday"`, `"2026-06-20"`, `"tomorrow"`, etc.
@@ -85,6 +88,23 @@ python tracker.py sync
 | Yellow | Due within 3 days |
 | Green | Done |
 | White | Upcoming (more than 3 days out) |
+
+---
+
+## Weekly Summary Export
+
+Running `export` generates a `.docx` Word document with all your assignments organized into four sections:
+
+- **Overdue** — past due and not done (red)
+- **Due This Week** — due within the next 7 days (yellow)
+- **Coming Up Later** — everything else pending
+- **Completed** — finished assignments (green)
+
+Each entry shows the assignment title, class, and due date. The file is saved to the project folder by default, named `DueList_Summary_YYYY-MM-DD.docx`. You can specify a custom path with `--output`:
+
+```
+duelist> export --output ~/Desktop/this_week.docx
+```
 
 ---
 
@@ -115,7 +135,6 @@ Assignments are saved locally to `assignments.json` in the project folder. This 
 
 ## Features Coming Next
 
-- **Weekly summary export** — generate a Word doc recap of the week's assignments
 - **Priority levels** — tag assignments as low / medium / high priority
 - **Recurring assignments** — set something to repeat weekly or by interval
 - **Reminders** — desktop notification when a due date is approaching
@@ -130,6 +149,7 @@ DueList/
 ├── tracker.py        # CLI entry point and REPL
 ├── storage.py        # Local JSON read/write
 ├── sheets.py         # Google Sheets sync
+├── export.py         # Word doc weekly summary
 ├── requirements.txt  # Python dependencies
 └── assignments.json  # Your data (auto-created, git-ignored)
 ```

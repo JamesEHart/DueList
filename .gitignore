@@ -1,6 +1,7 @@
 credentials.json
 config.json
 assignments.json
+*.docx
 __pycache__/
 *.pyc
 *.pyo
