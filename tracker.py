@@ -1,4 +1,5 @@
 import argparse
+import shlex
 import sys
 from datetime import date, timedelta
 
@@ -68,7 +69,7 @@ def cmd_add(args):
     }
     data["assignments"].append(assignment)
     storage.save(data)
-    print(f"Added [{assignment['id']}] \"{assignment['title']}\" — due {due_str}")
+    print(f"Added [{assignment['id']}] \"{assignment['title']}\" ... due {due_str}")
 
 
 def cmd_list(args):
@@ -99,7 +100,6 @@ def cmd_done(args):
             print(f"Marked [{args.id}] \"{a['title']}\" as done.")
             return
     print(f"No assignment with id {args.id}.")
-    sys.exit(1)
 
 
 def cmd_remove(args):
@@ -108,7 +108,7 @@ def cmd_remove(args):
     data["assignments"] = [a for a in data["assignments"] if a["id"] != args.id]
     if len(data["assignments"]) == before:
         print(f"No assignment with id {args.id}.")
-        sys.exit(1)
+        return
     storage.save(data)
     print(f"Removed assignment {args.id}.")
 
@@ -118,43 +118,84 @@ def cmd_sync(args):
     sync_to_sheets(data, sheet_name=args.sheet)
 
 
-def main():
-    parser = argparse.ArgumentParser(prog="tracker", description="DueList — assignment tracker")
+def build_parser():
+    parser = argparse.ArgumentParser(prog="duelist", description="DueList, assignment tracker")
     sub = parser.add_subparsers(dest="command", metavar="command")
-    sub.required = True
 
-    # add
     p_add = sub.add_parser("add", help="Add a new assignment")
     p_add.add_argument("title", help="Assignment title")
     p_add.add_argument("--class", dest="cls", required=True, metavar="CLASS", help="Course name")
     p_add.add_argument("--due", required=True, help="Due date (e.g. 'June 20', '2026-06-20')")
     p_add.set_defaults(func=cmd_add)
 
-    # list
     p_list = sub.add_parser("list", help="List all assignments")
     p_list.set_defaults(func=cmd_list)
 
-    # upcoming
     p_up = sub.add_parser("upcoming", help="Show assignments due in the next 7 days")
     p_up.set_defaults(func=cmd_upcoming)
 
-    # done
     p_done = sub.add_parser("done", help="Mark an assignment as done")
     p_done.add_argument("id", type=int, help="Assignment ID")
     p_done.set_defaults(func=cmd_done)
 
-    # remove
     p_rm = sub.add_parser("remove", help="Remove an assignment")
     p_rm.add_argument("id", type=int, help="Assignment ID")
     p_rm.set_defaults(func=cmd_remove)
 
-    # sync
     p_sync = sub.add_parser("sync", help="Sync to Google Sheets")
     p_sync.add_argument("--sheet", default="DueList", help="Sheet tab name (default: DueList)")
     p_sync.set_defaults(func=cmd_sync)
 
-    args = parser.parse_args()
-    args.func(args)
+    return parser
+
+
+def run_repl(parser):
+    print("DueList \nType a command or 'help' or 'quit'")
+    while True:
+        try:
+            line = input("duelist> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        if not line:
+            continue
+        if line in ("quit", "exit", "q"):
+            break
+        if line == "help":
+            parser.print_help()
+            continue
+
+        try:
+            tokens = shlex.split(line)
+        except ValueError as e:
+            print(f"Parse error: {e}")
+            continue
+
+        try:
+            args = parser.parse_args(tokens)
+        except SystemExit:
+            continue
+
+        if not args.command:
+            parser.print_help()
+            continue
+
+        args.func(args)
+
+
+def main():
+    parser = build_parser()
+
+    if len(sys.argv) == 1:
+        run_repl(parser)
+    else:
+        parser.required = True
+        args = parser.parse_args()
+        if not args.command:
+            parser.print_help()
+            sys.exit(1)
+        args.func(args)
 
 
 if __name__ == "__main__":
