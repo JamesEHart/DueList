@@ -68,3 +68,54 @@ def generate_summary(data, output_path=None):
 
     doc.save(output_path)
     return output_path
+
+
+def generate_summary_md(data, output_path=None):
+    today = date.today()
+    cutoff = today + timedelta(days=7)
+
+    overdue = [
+        a for a in data["assignments"]
+        if not a["done"] and date.fromisoformat(a["due"]) < today
+    ]
+    this_week = [
+        a for a in data["assignments"]
+        if not a["done"] and today <= date.fromisoformat(a["due"]) <= cutoff
+    ]
+    completed = [a for a in data["assignments"] if a["done"]]
+    later = [
+        a for a in data["assignments"]
+        if not a["done"] and date.fromisoformat(a["due"]) > cutoff
+    ]
+
+    def section(heading, assignments):
+        lines = [f"## {heading}", ""]
+        if not assignments:
+            lines += ["_None_", ""]
+        else:
+            for a in sorted(assignments, key=lambda x: x["due"]):
+                due = date.fromisoformat(a["due"]).strftime("%B %d, %Y")
+                lines.append(f"- **{a['title']}** — {a['class']} | Due {due}")
+            lines.append("")
+        return "\n".join(lines)
+
+    content = "\n".join([
+        f"# DueList Weekly Summary",
+        f"_Generated {today.strftime('%B %d, %Y')}_",
+        "",
+        section("Overdue", overdue),
+        section("Due This Week", this_week),
+        section("Coming Up Later", later),
+        section("Completed", completed),
+    ])
+
+    if output_path is None:
+        output_path = os.path.join(
+            os.path.dirname(__file__),
+            f"DueList_Summary_{today.isoformat()}.md",
+        )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return output_path

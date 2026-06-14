@@ -2,6 +2,7 @@ credentials.json
 config.json
 assignments.json
 *.docx
+DueList_Summary_*.md
 __pycache__/
 *.pyc
 *.pyo

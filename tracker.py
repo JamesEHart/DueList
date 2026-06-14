@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from dateutil import parser as dateparser
 
 import storage
-from export import generate_summary
+from export import generate_summary, generate_summary_md
 from sheets import sync_to_sheets
 
 try:
@@ -116,7 +116,10 @@ def cmd_remove(args):
 
 def cmd_export(args):
     data = storage.load()
-    path = generate_summary(data, output_path=args.output or None)
+    if args.format == "md":
+        path = generate_summary_md(data, output_path=args.output or None)
+    else:
+        path = generate_summary(data, output_path=args.output or None)
     print(f"Summary saved to {path}")
 
 
@@ -149,8 +152,9 @@ def build_parser():
     p_rm.add_argument("id", type=int, help="Assignment ID")
     p_rm.set_defaults(func=cmd_remove)
 
-    p_export = sub.add_parser("export", help="Export a weekly summary as a Word doc")
-    p_export.add_argument("--output", default=None, metavar="FILE", help="Output file path (default: DueList_Summary_YYYY-MM-DD.docx)")
+    p_export = sub.add_parser("export", help="Export a weekly summary as a Word doc or Markdown file")
+    p_export.add_argument("--format", choices=["docx", "md"], default="docx", help="Output format: docx (default) or md")
+    p_export.add_argument("--output", default=None, metavar="FILE", help="Output file path (default: DueList_Summary_YYYY-MM-DD.<ext>)")
     p_export.set_defaults(func=cmd_export)
 
     p_sync = sub.add_parser("sync", help="Sync to Google Sheets")

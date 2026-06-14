@@ -73,7 +73,7 @@ python tracker.py export
 | `upcoming` | Show assignments due within the next 7 days |
 | `done <id>` | Mark an assignment as done |
 | `remove <id>` | Delete an assignment |
-| `export` | Export a weekly summary as a Word doc |
+| `export` | Export a weekly summary as a Word doc or Markdown file |
 | `sync` | Push current state to Google Sheets |
 
 **Due dates** accept natural language: `"June 20"`, `"next Friday"`, `"2026-06-20"`, `"tomorrow"`, etc.
@@ -100,11 +100,16 @@ Running `export` generates a `.docx` Word document with all your assignments org
 - **Coming Up Later** — everything else pending
 - **Completed** — finished assignments (green)
 
-Each entry shows the assignment title, class, and due date. The file is saved to the project folder by default, named `DueList_Summary_YYYY-MM-DD.docx`. You can specify a custom path with `--output`:
+Each entry shows the assignment title, class, and due date. The file is saved to the project folder by default. You can choose the format with `--format` and a custom path with `--output`:
 
 ```
-duelist> export --output ~/Desktop/this_week.docx
+duelist> export                                      # Word doc (default)
+duelist> export --format md                          # Markdown file
+duelist> export --format docx --output ~/Desktop/this_week.docx
+duelist> export --format md --output ~/Desktop/this_week.md
 ```
+
+Default filenames are `DueList_Summary_YYYY-MM-DD.docx` and `DueList_Summary_YYYY-MM-DD.md` respectively.
 
 ---
 
